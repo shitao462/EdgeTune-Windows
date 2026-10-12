@@ -1,0 +1,40 @@
+name: Build Windows
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Test lyric matching and parsing
+        run: dotnet run --project tests/EdgeTune.Tests.csproj -c Release
+      - name: Publish portable Windows x64 app
+        run: dotnet publish src/EdgeTune.Windows/EdgeTune.Windows.csproj -c Release -r win-x64 --self-contained true -o artifacts/EdgeTune-Windows-x64 -p:PublishSingleFile=false
+      - name: Include instructions and license
+        shell: pwsh
+        run: |
+          Copy-Item README.md, LICENSE artifacts/EdgeTune-Windows-x64/
+          Compress-Archive artifacts/EdgeTune-Windows-x64/* artifacts/EdgeTune-Windows-x64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: EdgeTune-Windows-x64
+          path: artifacts/EdgeTune-Windows-x64.zip
+          retention-days: 30
+      - name: Publish tagged release
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create ${{ github.ref_name }} artifacts/EdgeTune-Windows-x64.zip --title "EdgeTune Windows ${{ github.ref_name }}" --generate-notes
+        # Tag publishing uses this job's explicit content-write permission below.
+    permissions:
+      contents: write
