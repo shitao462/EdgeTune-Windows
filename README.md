@@ -48,6 +48,8 @@ Mac 可进行源码和跨平台歌词测试，并用 `EnableWindowsTargeting` �
 
 ## 首次实机检查
 
+交给 Windows Agent 执行的完整步骤、验收标准和报告模板：[实机测试说明](docs/WINDOWS_AGENT_TEST_PLAN.md)。
+
 - 四种播放器的识别与切歌，暂停 / 恢复和进度同步。
 - 外文歌双语歌词、长歌词、纯音乐及无歌词情况。
 - LOL 无边框模式快捷键呼出、切歌不抢焦点、移开收起。
